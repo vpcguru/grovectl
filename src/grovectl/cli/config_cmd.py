@@ -9,7 +9,7 @@ from __future__ import annotations
 import click
 import yaml
 
-from grovectl.cli.main import Context, pass_context
+from grovectl.cli.context import Context, pass_context
 from grovectl.core.config import ConfigManager, get_default_config_path
 from grovectl.core.exceptions import ConfigurationError
 from grovectl.utils.output import console, print_error, print_info, print_success

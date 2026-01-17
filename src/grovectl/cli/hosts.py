@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import click
 
-from grovectl.cli.main import Context, pass_context
+from grovectl.cli.context import Context, pass_context
 from grovectl.core.exceptions import ConfigurationError
 from grovectl.models.host import Host
 from grovectl.utils.output import (
@@ -236,8 +236,7 @@ def hosts_show(ctx: Context, name: str, fmt: str) -> None:
     if host is None:
         print_error(f"Host '{name}' not found")
         print_warning(
-            "Available hosts: "
-            + ", ".join(config.config.host_names)
+            "Available hosts: " + ", ".join(config.config.host_names)
             if config.config.host_names
             else "none"
         )

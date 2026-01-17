@@ -9,9 +9,9 @@ from grovectl.utils.output import OutputFormatter, console
 from grovectl.utils.retry import retry_with_backoff
 
 __all__ = [
-    "configure_logging",
-    "get_logger",
-    "console",
     "OutputFormatter",
+    "configure_logging",
+    "console",
+    "get_logger",
     "retry_with_backoff",
 ]

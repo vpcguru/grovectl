@@ -73,9 +73,7 @@ def retry_with_backoff(
                     last_exception = e
 
                     if attempt >= max_attempts:
-                        logger.error(
-                            f"All {max_attempts} attempts failed for {func.__name__}: {e}"
-                        )
+                        logger.error(f"All {max_attempts} attempts failed for {func.__name__}: {e}")
                         raise
 
                     # Calculate delay with exponential backoff

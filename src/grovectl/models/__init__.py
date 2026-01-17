@@ -7,8 +7,8 @@ from grovectl.models.host import Host, HostConfig
 from grovectl.models.vm import VM, VMState
 
 __all__ = [
+    "VM",
     "Host",
     "HostConfig",
-    "VM",
     "VMState",
 ]

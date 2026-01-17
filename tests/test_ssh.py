@@ -8,7 +8,6 @@ import pytest
 
 from grovectl.core.exceptions import (
     SSHAuthenticationError,
-    SSHConnectionError,
     SSHTimeoutError,
 )
 from grovectl.core.ssh import SSHManager, SSHResult
@@ -129,10 +128,9 @@ class TestSSHManager:
         host: Host,
     ) -> None:
         """Test connection timeout."""
-        import socket
 
         mock_client = MagicMock()
-        mock_client.connect.side_effect = socket.timeout()
+        mock_client.connect.side_effect = TimeoutError()
         mock_client_class.return_value = mock_client
 
         with pytest.raises(SSHTimeoutError) as exc_info:

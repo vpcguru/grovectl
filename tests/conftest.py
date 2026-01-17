@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import tempfile
 from pathlib import Path
-from typing import Generator
+from typing import TYPE_CHECKING
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -18,6 +18,11 @@ from grovectl.core.config import ConfigManager
 from grovectl.core.ssh import SSHManager, SSHResult
 from grovectl.models.host import Host
 from grovectl.models.vm import VM, VMState
+
+if TYPE_CHECKING:
+    from collections.abc import Generator
+
+    from click.testing import CliRunner
 
 
 @pytest.fixture
@@ -160,7 +165,7 @@ def mock_ssh_result_failure() -> SSHResult:
 
 
 @pytest.fixture
-def mock_ssh_manager() -> Generator[MagicMock, None, None]:
+def mock_ssh_manager() -> Generator[SSHManager, None, None]:
     """Create a mocked SSH manager."""
     with patch.object(SSHManager, "__init__", lambda self, **kwargs: None):
         manager = SSHManager()
@@ -195,7 +200,7 @@ def mock_ssh_client() -> MagicMock:
 @pytest.fixture
 def tart_list_json_output() -> str:
     """Sample JSON output from 'tart list --format json'."""
-    return '''[
+    return """[
         {
             "Name": "vm-1",
             "State": "running",
@@ -212,11 +217,11 @@ def tart_list_json_output() -> str:
             "Disk": 25,
             "Source": "template-vm"
         }
-    ]'''
+    ]"""
 
 
 @pytest.fixture
-def cli_runner():
+def cli_runner() -> CliRunner:
     """Create a Click test runner."""
     from click.testing import CliRunner
 

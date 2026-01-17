@@ -13,10 +13,6 @@ from __future__ import annotations
 import logging
 import sys
 from pathlib import Path
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    pass
 
 # Custom log format
 LOG_FORMAT = "%(asctime)s [%(levelname)s] %(name)s: %(message)s"
@@ -80,9 +76,7 @@ def configure_logging(
     # Console handler (stderr)
     console_handler = logging.StreamHandler(sys.stderr)
     console_handler.setLevel(level)
-    console_handler.setFormatter(
-        logging.Formatter(LOG_FORMAT, datefmt=LOG_DATE_FORMAT)
-    )
+    console_handler.setFormatter(logging.Formatter(LOG_FORMAT, datefmt=LOG_DATE_FORMAT))
     root_logger.addHandler(console_handler)
 
     # File handler (if specified)
@@ -92,9 +86,7 @@ def configure_logging(
 
         file_handler = logging.FileHandler(log_path)
         file_handler.setLevel(logging.DEBUG)  # Always debug in file
-        file_handler.setFormatter(
-            logging.Formatter(LOG_FORMAT, datefmt=LOG_DATE_FORMAT)
-        )
+        file_handler.setFormatter(logging.Formatter(LOG_FORMAT, datefmt=LOG_DATE_FORMAT))
         root_logger.addHandler(file_handler)
 
     # Configure paramiko logging for -vvv

@@ -7,89 +7,16 @@ shared across all commands.
 from __future__ import annotations
 
 import sys
-from typing import TYPE_CHECKING
 
 import click
 from rich.console import Console
 
 from grovectl import __version__
-from grovectl.cli.batch import batch
-from grovectl.cli.config_cmd import config
-from grovectl.cli.hosts import hosts
-from grovectl.cli.vm import vm
+from grovectl.cli.context import Context, pass_context
 from grovectl.core.config import ConfigManager, get_default_config_path
 from grovectl.core.exceptions import GrovectlError
-from grovectl.core.ssh import SSHManager
-from grovectl.core.vm_manager import VMManager
 from grovectl.utils.logging import configure_logging
 from grovectl.utils.output import error_console, print_error
-
-if TYPE_CHECKING:
-    pass
-
-
-class Context:
-    """CLI context object passed to all commands.
-
-    Holds shared state including configuration, SSH manager,
-    and CLI options like verbosity and dry-run mode.
-
-    Attributes:
-        config: ConfigManager instance.
-        ssh: SSHManager instance.
-        vm_manager: VMManager instance.
-        verbose: Verbosity level (0-3).
-        dry_run: Whether to run in dry-run mode.
-        debug: Whether to show debug tracebacks.
-    """
-
-    def __init__(self) -> None:
-        self.config: ConfigManager | None = None
-        self.ssh: SSHManager | None = None
-        self.vm_manager: VMManager | None = None
-        self.verbose: int = 0
-        self.dry_run: bool = False
-        self.debug: bool = False
-
-    def init_config(self) -> ConfigManager:
-        """Initialize configuration manager.
-
-        Returns:
-            ConfigManager instance.
-        """
-        if self.config is None:
-            self.config = ConfigManager()
-        return self.config
-
-    def init_ssh(self) -> SSHManager:
-        """Initialize SSH manager.
-
-        Returns:
-            SSHManager instance.
-        """
-        if self.ssh is None:
-            self.ssh = SSHManager()
-        return self.ssh
-
-    def init_vm_manager(self) -> VMManager:
-        """Initialize VM manager.
-
-        Returns:
-            VMManager instance.
-        """
-        if self.vm_manager is None:
-            config = self.init_config()
-            ssh = self.init_ssh()
-            self.vm_manager = VMManager(config, ssh, dry_run=self.dry_run)
-        return self.vm_manager
-
-    def cleanup(self) -> None:
-        """Clean up resources."""
-        if self.ssh:
-            self.ssh.close_all()
-
-
-pass_context = click.make_pass_decorator(Context, ensure=True)
 
 
 def version_callback(ctx: click.Context, _param: click.Parameter, value: bool) -> None:
@@ -181,6 +108,12 @@ def cli(
 
         ctx.config = ConfigManager(Path(config_path))
 
+
+# Import subcommands after cli is defined to avoid circular imports
+from grovectl.cli.batch import batch  # noqa: E402
+from grovectl.cli.config_cmd import config  # noqa: E402
+from grovectl.cli.hosts import hosts  # noqa: E402
+from grovectl.cli.vm import vm  # noqa: E402
 
 # Register subcommand groups
 cli.add_command(hosts)

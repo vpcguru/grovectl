@@ -5,10 +5,9 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-import yaml
 
 from grovectl.core.config import Config, ConfigManager, DefaultsConfig, LoggingConfig
-from grovectl.core.exceptions import ConfigNotFoundError, ConfigurationError
+from grovectl.core.exceptions import ConfigurationError
 from grovectl.models.host import Host
 
 
@@ -134,9 +133,7 @@ class TestConfigManager:
     def test_add_duplicate_host(self, config_manager: ConfigManager) -> None:
         """Test that adding a duplicate host raises an error."""
         with pytest.raises(ConfigurationError, match="already exists"):
-            config_manager.add_host(
-                Host(name="mac-builder-1", hostname="192.168.1.200")
-            )
+            config_manager.add_host(Host(name="mac-builder-1", hostname="192.168.1.200"))
 
     def test_remove_host(self, config_manager: ConfigManager) -> None:
         """Test removing a host."""

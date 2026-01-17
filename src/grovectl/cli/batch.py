@@ -9,7 +9,7 @@ from __future__ import annotations
 import click
 from rich.table import Table
 
-from grovectl.cli.main import Context, pass_context
+from grovectl.cli.context import Context, pass_context
 from grovectl.core.exceptions import HostNotFoundError
 from grovectl.utils.output import console, print_error, print_info, print_success
 
@@ -260,7 +260,4 @@ def _print_batch_results(results: list[tuple[str, bool, str]], operation: str) -
     if fail_count == 0:
         print_success(f"All {success_count} VM(s) processed successfully")
     else:
-        console.print(
-            f"[green]{success_count} succeeded[/green], "
-            f"[red]{fail_count} failed[/red]"
-        )
+        console.print(f"[green]{success_count} succeeded[/green], [red]{fail_count} failed[/red]")

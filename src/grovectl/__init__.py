@@ -23,11 +23,11 @@ from grovectl.core.exceptions import (
 )
 
 __all__ = [
-    "__version__",
-    "GrovectlError",
     "ConfigurationError",
-    "SSHConnectionError",
-    "VMOperationError",
+    "GrovectlError",
     "HostNotFoundError",
+    "SSHConnectionError",
     "VMNotFoundError",
+    "VMOperationError",
+    "__version__",
 ]
