@@ -315,10 +315,7 @@ class ConfigManager:
         Returns:
             Path to the created config file.
         """
-        if path is None:
-            path = get_default_config_path()
-        else:
-            path = Path(path).expanduser()
+        path = get_default_config_path() if path is None else Path(path).expanduser()
 
         path.parent.mkdir(parents=True, exist_ok=True)
 

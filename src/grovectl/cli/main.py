@@ -115,7 +115,7 @@ from grovectl.cli.config_cmd import config  # noqa: E402
 from grovectl.cli.hosts import hosts  # noqa: E402
 from grovectl.cli.vm import vm  # noqa: E402
 
-# Register subcommand groups
+# Register subcommand groups (deferred imports to avoid circular import cycles)
 cli.add_command(hosts)
 cli.add_command(vm)
 cli.add_command(batch)

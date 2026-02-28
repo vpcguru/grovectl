@@ -222,73 +222,29 @@ grovectl vm list --format yaml
 
 ## Development
 
-### Setup Development Environment
+### Setup
 
 ```bash
 # Install uv (if not already installed)
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# Install nox globally
-uv tool install nox
+# Run tests
+make test
 
-# Set up development environment
-nox -s dev
-```
+# Run tests with coverage
+make test-cov
 
-### Common Development Tasks
+# Format code
+make format
 
-```bash
-# Run all checks (lint, type check, tests) - this is the default
-nox
+# Lint code
+make lint
 
-# Run tests only
-nox -s tests
-
-# Run tests for specific Python version
-nox -s tests-3.11
-
-# Run tests with specific test file
-nox -s tests -- tests/test_config.py
-
-# Run linting
-nox -s lint
-
-# Auto-fix linting issues
-nox -s lint -- --fix
-
-# Check code formatting
-nox -s format
-
-# Apply code formatting
-nox -s format -- --write
-
-# Type checking
-nox -s type_check
-
-# Build distribution packages
-nox -s build
-
-# Install in editable mode
-nox -s install
-
-# Clean build artifacts
-nox -s clean
+# Type check
+make type-check
 
 # Run pre-commit hooks
-nox -s pre_commit
-
-# List all available sessions
-nox --list
-```
-
-### Running Tests with Coverage
-
-```bash
-# Run tests with HTML coverage report
-nox -s tests
-
-# View coverage report
-open htmlcov/index.html  # macOS
+make pre-commit
 ```
 
 ### Project Structure

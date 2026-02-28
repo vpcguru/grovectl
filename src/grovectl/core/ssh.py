@@ -9,6 +9,7 @@ This module provides a thread-safe SSH connection manager that handles:
 
 from __future__ import annotations
 
+import contextlib
 import threading
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -213,10 +214,8 @@ class SSHManager:
 
                 # Remove stale connection
                 logger.debug(f"Removing stale connection for {host.name}")
-                try:
+                with contextlib.suppress(Exception):
                     pooled.client.close()
-                except Exception:
-                    pass
                 del self._pool[host.name]
 
             # Create new connection
@@ -293,7 +292,9 @@ class SSHManager:
             return result
 
         except TimeoutError as e:
-            raise SSHConnectionError(host.hostname, f"Command timed out after {timeout}s") from e
+            raise SSHConnectionError(
+                host.hostname, f"Command timed out after {timeout}s"
+            ) from e
 
         except paramiko.SSHException as e:
             # Connection may be stale, try to reconnect
@@ -347,10 +348,8 @@ class SSHManager:
         """
         with self._lock:
             if host_name in self._pool:
-                try:
+                with contextlib.suppress(Exception):
                     self._pool[host_name].client.close()
-                except Exception:
-                    pass
                 del self._pool[host_name]
                 logger.debug(f"Closed connection for {host_name}")
 
@@ -358,10 +357,8 @@ class SSHManager:
         """Close all pooled connections."""
         with self._lock:
             for _name, pooled in list(self._pool.items()):
-                try:
+                with contextlib.suppress(Exception):
                     pooled.client.close()
-                except Exception:
-                    pass
             self._pool.clear()
             logger.debug("Closed all SSH connections")
 
