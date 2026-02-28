@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -10,8 +10,7 @@ from grovectl.core.config import ConfigManager
 from grovectl.core.exceptions import HostNotFoundError, VMNotFoundError
 from grovectl.core.ssh import SSHManager, SSHResult
 from grovectl.core.vm_manager import VMManager
-from grovectl.models.host import Host
-from grovectl.models.vm import VM, VMState
+from grovectl.models.vm import VMState
 
 
 class TestVMManager:
@@ -239,9 +238,7 @@ class TestVMManager:
             command="tart clone source-vm new-vm",
         )
 
-        vm = vm_manager.clone_vm(
-            "source-vm", "new-vm", "mac-builder-1", show_progress=False
-        )
+        vm = vm_manager.clone_vm("source-vm", "new-vm", "mac-builder-1", show_progress=False)
 
         assert vm.name == "new-vm"
         assert vm.state == VMState.STOPPED
@@ -288,9 +285,9 @@ class TestVMManager:
         mock_ssh_manager: MagicMock,
     ) -> None:
         """Test batch starting VMs."""
-        # Mock list_vms
+        # Mock list_vms - note: start_vm calls get_vm() internally to get updated status
         mock_ssh_manager.run.side_effect = [
-            # First call for list
+            # First call for list (batch_start initial list)
             SSHResult(
                 stdout='[{"Name": "test-1", "State": "stopped"}, {"Name": "test-2", "State": "stopped"}]',
                 stderr="",
@@ -298,9 +295,38 @@ class TestVMManager:
                 host="mac-builder-1",
                 command="tart list --format json",
             ),
-            # Start calls
-            SSHResult(stdout="", stderr="", exit_code=0, host="mac-builder-1", command="tart run test-1"),
-            SSHResult(stdout="", stderr="", exit_code=0, host="mac-builder-1", command="tart run test-2"),
+            # Start test-1
+            SSHResult(
+                stdout="",
+                stderr="",
+                exit_code=0,
+                host="mac-builder-1",
+                command="tart run test-1",
+            ),
+            # get_vm for test-1 (called by start_vm to return updated status)
+            SSHResult(
+                stdout='[{"Name": "test-1", "State": "running"}]',
+                stderr="",
+                exit_code=0,
+                host="mac-builder-1",
+                command="tart list --format json",
+            ),
+            # Start test-2
+            SSHResult(
+                stdout="",
+                stderr="",
+                exit_code=0,
+                host="mac-builder-1",
+                command="tart run test-2",
+            ),
+            # get_vm for test-2 (called by start_vm to return updated status)
+            SSHResult(
+                stdout='[{"Name": "test-2", "State": "running"}]',
+                stderr="",
+                exit_code=0,
+                host="mac-builder-1",
+                command="tart list --format json",
+            ),
         ]
 
         results = vm_manager.batch_start("test-*", host_name="mac-builder-1")
@@ -324,8 +350,20 @@ class TestVMManager:
                 command="tart list --format json",
             ),
             # Stop calls
-            SSHResult(stdout="", stderr="", exit_code=0, host="mac-builder-1", command="tart stop test-1"),
-            SSHResult(stdout="", stderr="", exit_code=0, host="mac-builder-1", command="tart stop test-2"),
+            SSHResult(
+                stdout="",
+                stderr="",
+                exit_code=0,
+                host="mac-builder-1",
+                command="tart stop test-1",
+            ),
+            SSHResult(
+                stdout="",
+                stderr="",
+                exit_code=0,
+                host="mac-builder-1",
+                command="tart stop test-2",
+            ),
         ]
 
         results = vm_manager.batch_stop("test-*", host_name="mac-builder-1")

@@ -8,8 +8,12 @@ from __future__ import annotations
 
 import click
 
-from grovectl.cli.main import Context, pass_context
-from grovectl.core.exceptions import HostNotFoundError, VMNotFoundError, VMOperationError
+from grovectl.cli.context import Context, pass_context
+from grovectl.core.exceptions import (
+    HostNotFoundError,
+    VMNotFoundError,
+    VMOperationError,
+)
 from grovectl.utils.output import (
     OutputFormat,
     OutputFormatter,
@@ -315,9 +319,7 @@ def vm_clone(ctx: Context, source: str, destination: str, host_name: str) -> Non
         $ grovectl vm clone template-vm new-vm --host mac-builder-1
     """
     if ctx.dry_run:
-        print_info(
-            f"[DRY RUN] Would clone '{source}' to '{destination}' on '{host_name}'"
-        )
+        print_info(f"[DRY RUN] Would clone '{source}' to '{destination}' on '{host_name}'")
         return
 
     try:

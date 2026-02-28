@@ -126,12 +126,8 @@ class Config(BaseModel):
     """
 
     hosts: list[Host] = Field(default_factory=list, description="Configured hosts")
-    defaults: DefaultsConfig = Field(
-        default_factory=DefaultsConfig, description="Default values"
-    )
-    logging: LoggingConfig = Field(
-        default_factory=LoggingConfig, description="Logging config"
-    )
+    defaults: DefaultsConfig = Field(default_factory=DefaultsConfig, description="Default values")
+    logging: LoggingConfig = Field(default_factory=LoggingConfig, description="Logging config")
 
     def get_host(self, name: str) -> Host | None:
         """Get a host by name.
@@ -238,9 +234,7 @@ class ConfigManager:
             data = self.config.model_dump(exclude_none=True)
             # Convert Host objects to dicts
             if "hosts" in data:
-                data["hosts"] = [
-                    h if isinstance(h, dict) else h for h in data["hosts"]
-                ]
+                data["hosts"] = [h if isinstance(h, dict) else h for h in data["hosts"]]
 
             with self.path.open("w") as f:
                 yaml.safe_dump(data, f, default_flow_style=False, sort_keys=False)

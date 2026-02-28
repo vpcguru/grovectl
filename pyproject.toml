@@ -8,7 +8,7 @@ version = "0.1.0"
 description = "CLI tool for managing macOS VMs via SSH on remote hosts"
 readme = "README.md"
 license = "MIT"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 authors = [
     { name = "Your Name", email = "you@example.com" }
 ]
@@ -21,7 +21,6 @@ classifiers = [
     "Operating System :: MacOS",
     "Operating System :: POSIX :: Linux",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Topic :: System :: Systems Administration",
@@ -40,19 +39,42 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
-    "pytest>=7.0.0",
-    "pytest-cov>=4.0.0",
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
     "pytest-mock>=3.10.0",
-    "mypy>=1.0.0",
-    "black>=23.0.0",
-    "ruff>=0.1.0",
+    "mypy>=1.5.0",
+    "ruff>=0.8.0",
     "pre-commit>=3.0.0",
     "types-paramiko>=3.0.0",
     "types-PyYAML>=6.0.0",
+    "nox>=2024.0.0",
+    "nox-uv>=0.1.0",
+    "build>=1.0.0",
 ]
 test = [
-    "pytest>=7.0.0",
-    "pytest-cov>=4.0.0",
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
+    "pytest-mock>=3.10.0",
+]
+
+# PEP 735 dependency groups (for uv)
+[dependency-groups]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
+    "pytest-mock>=3.10.0",
+    "mypy>=1.5.0",
+    "ruff>=0.8.0",
+    "pre-commit>=3.0.0",
+    "types-paramiko>=3.0.0",
+    "types-PyYAML>=6.0.0",
+    "nox>=2024.0.0",
+    "nox-uv>=0.1.0",
+    "build>=1.0.0",
+]
+test = [
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
     "pytest-mock>=3.10.0",
 ]
 
@@ -68,14 +90,9 @@ Issues = "https://github.com/yourusername/grovectl/issues"
 [tool.hatch.build.targets.wheel]
 packages = ["src/grovectl"]
 
-[tool.black]
-line-length = 88
-target-version = ["py310", "py311", "py312"]
-include = '\.pyi?$'
-
 [tool.ruff]
-line-length = 88
-target-version = "py310"
+line-length = 100
+target-version = "py311"
 
 [tool.ruff.lint]
 select = [
@@ -88,18 +105,39 @@ select = [
     "UP",     # pyupgrade
     "ARG",    # flake8-unused-arguments
     "SIM",    # flake8-simplify
+    "PTH",    # flake8-use-pathlib
+    "PL",     # Pylint
+    "RUF",    # Ruff-specific rules
 ]
 ignore = [
-    "E501",   # line too long (handled by black)
-    "B008",   # do not perform function calls in argument defaults
-    "B905",   # zip without explicit strict
+    "E501",    # line too long (handled by formatter)
+    "B008",    # do not perform function calls in argument defaults
+    "B904",    # raise from in except clause (not always needed)
+    "B905",    # zip without explicit strict
+    "SIM105",  # contextlib.suppress vs try-except-pass (stylistic)
+    "SIM108",  # ternary operator vs if-else (stylistic, if-else often more readable)
+    "PLC0415", # import not at top-level (used for lazy loading/avoiding circular imports)
+    "PLR0913", # too many arguments
+    "PLR2004", # magic value comparison
+    "RUF001",  # ambiguous unicode (intentional use of info icon)
+    "RUF034",  # useless if-else (false positive on type narrowing)
 ]
 
 [tool.ruff.lint.isort]
 known-first-party = ["grovectl"]
 
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = [
+    "ARG",     # unused arguments in fixtures
+    "PLR2004", # magic values in tests are fine
+]
+"src/grovectl/cli/**/*.py" = [
+    "ARG001",  # unused ctx argument in Click commands is common
+]
+"__init__.py" = ["F401"]  # unused imports in __init__.py
+
 [tool.mypy]
-python_version = "3.10"
+python_version = "3.11"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true
@@ -127,6 +165,8 @@ addopts = [
     "-v",
     "--tb=short",
     "--strict-markers",
+    "--strict-config",
+    "-ra",
 ]
 markers = [
     "slow: marks tests as slow",
@@ -145,4 +185,6 @@ exclude_lines = [
     "raise NotImplementedError",
     "if TYPE_CHECKING:",
     "if __name__ == .__main__.:",
+    "@abstractmethod",
 ]
+show_missing = true

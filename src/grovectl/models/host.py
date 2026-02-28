@@ -34,9 +34,7 @@ class Host(BaseModel):
     name: Annotated[str, Field(min_length=1, description="Unique host identifier")]
     hostname: Annotated[str, Field(min_length=1, description="IP address or hostname")]
     username: str | None = Field(default=None, description="SSH username")
-    port: Annotated[int, Field(ge=1, le=65535)] = Field(
-        default=22, description="SSH port"
-    )
+    port: Annotated[int, Field(ge=1, le=65535)] = Field(default=22, description="SSH port")
     ssh_key: str | None = Field(default=None, description="Path to SSH private key")
 
     @field_validator("ssh_key")

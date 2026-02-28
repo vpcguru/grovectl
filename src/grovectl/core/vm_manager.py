@@ -384,9 +384,7 @@ class VMManager:
         if show_progress:
             progress = create_spinner_progress()
             with progress:
-                task = progress.add_task(
-                    f"Cloning {source} to {destination}...", total=None
-                )
+                task = progress.add_task(f"Cloning {source} to {destination}...", total=None)
                 result = self._run_tart(host, "clone", [source, destination])
                 progress.update(task, completed=True)
         else:

@@ -89,8 +89,8 @@ dmypy.json
 # Jupyter Notebook
 .ipynb_checkpoints
 
-# pyenv
-.python-version
+# pyenv (keeping .python-version for uv/pyenv detection)
+# .python-version
 
 # macOS
 .DS_Store

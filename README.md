@@ -24,16 +24,19 @@ grovectl enables you to orchestrate macOS VMs running on remote Mac hosts using 
 git clone https://github.com/yourusername/grovectl.git
 cd grovectl
 
-# Install in development mode
-make install-dev
+# Install with uv (recommended)
+uv pip install .
 
-# Or install normally
+# Or install in development mode with nox
+nox -s dev
+
+# Or install with pip
 pip install .
 ```
 
 ### Requirements
 
-- Python 3.10+
+- Python 3.11+
 - Remote hosts must have [tart](https://github.com/cirruslabs/tart) installed
 - SSH access to remote hosts (key-based auth recommended)
 
@@ -219,29 +222,73 @@ grovectl vm list --format yaml
 
 ## Development
 
-### Setup
+### Setup Development Environment
 
 ```bash
-# Install development dependencies
-make install-dev
+# Install uv (if not already installed)
+curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# Run tests
-make test
+# Install nox globally
+uv tool install nox
 
-# Run tests with coverage
-make test-cov
+# Set up development environment
+nox -s dev
+```
 
-# Format code
-make format
+### Common Development Tasks
 
-# Lint code
-make lint
+```bash
+# Run all checks (lint, type check, tests) - this is the default
+nox
 
-# Type check
-make type-check
+# Run tests only
+nox -s tests
+
+# Run tests for specific Python version
+nox -s tests-3.11
+
+# Run tests with specific test file
+nox -s tests -- tests/test_config.py
+
+# Run linting
+nox -s lint
+
+# Auto-fix linting issues
+nox -s lint -- --fix
+
+# Check code formatting
+nox -s format
+
+# Apply code formatting
+nox -s format -- --write
+
+# Type checking
+nox -s type_check
+
+# Build distribution packages
+nox -s build
+
+# Install in editable mode
+nox -s install
+
+# Clean build artifacts
+nox -s clean
 
 # Run pre-commit hooks
-make pre-commit
+nox -s pre_commit
+
+# List all available sessions
+nox --list
+```
+
+### Running Tests with Coverage
+
+```bash
+# Run tests with HTML coverage report
+nox -s tests
+
+# View coverage report
+open htmlcov/index.html  # macOS
 ```
 
 ### Project Structure
@@ -269,24 +316,28 @@ grovectl/
 │       └── retry.py        # Retry with backoff
 ├── tests/                  # Test suite
 ├── pyproject.toml          # Project configuration
-├── Makefile                # Development tasks
+├── noxfile.py              # Task automation (tests, lint, etc.)
+├── justfile                # Convenience wrapper for common tasks
 └── README.md               # This file
 ```
 
 ### Running Tests
 
 ```bash
-# Run all tests
-pytest
+# Run all tests (with coverage)
+nox -s tests
+
+# Run tests for specific Python version
+nox -s tests-3.11
 
 # Run specific test file
-pytest tests/test_config.py
-
-# Run with coverage
-pytest --cov=grovectl --cov-report=html
+nox -s tests -- tests/test_config.py
 
 # Run only unit tests (not integration)
-pytest -m "not integration"
+nox -s tests -- -m "not integration"
+
+# Stop on first failure
+nox -s tests -- -x
 ```
 
 ## Configuration Reference

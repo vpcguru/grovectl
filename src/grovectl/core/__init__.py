@@ -19,12 +19,12 @@ from grovectl.core.vm_manager import VMManager
 __all__ = [
     "Config",
     "ConfigManager",
+    "ConfigurationError",
+    "GrovectlError",
+    "HostNotFoundError",
+    "SSHConnectionError",
     "SSHManager",
     "VMManager",
-    "GrovectlError",
-    "ConfigurationError",
-    "SSHConnectionError",
-    "VMOperationError",
-    "HostNotFoundError",
     "VMNotFoundError",
+    "VMOperationError",
 ]

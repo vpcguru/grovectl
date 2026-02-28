@@ -9,11 +9,9 @@ This module provides a thread-safe SSH connection manager that handles:
 
 from __future__ import annotations
 
-import socket
 import threading
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import TYPE_CHECKING
 
 import paramiko
 
@@ -25,9 +23,6 @@ from grovectl.core.exceptions import (
 from grovectl.models.host import Host
 from grovectl.utils.logging import get_logger
 from grovectl.utils.retry import retry_with_backoff
-
-if TYPE_CHECKING:
-    pass
 
 logger = get_logger("ssh")
 
@@ -159,9 +154,7 @@ class SSHManager:
                 logger.warning(f"SSH key not found: {host.ssh_key}")
 
         try:
-            logger.debug(
-                f"Connecting to {host.hostname}:{host.port} as {host.username}"
-            )
+            logger.debug(f"Connecting to {host.hostname}:{host.port} as {host.username}")
             client.connect(
                 hostname=host.hostname,
                 port=host.port,
@@ -179,7 +172,7 @@ class SSHManager:
             client.close()
             raise SSHAuthenticationError(host.hostname, host.username) from e
 
-        except socket.timeout as e:
+        except TimeoutError as e:
             client.close()
             raise SSHTimeoutError(host.hostname, connect_timeout) from e
 
@@ -277,7 +270,7 @@ class SSHManager:
             client = self.get_client(host, password=password)
             exec_timeout = timeout or self.default_timeout
 
-            stdin, stdout, stderr = client.exec_command(command, timeout=exec_timeout)
+            _stdin, stdout, stderr = client.exec_command(command, timeout=exec_timeout)
 
             # Read output
             stdout_data = stdout.read().decode("utf-8", errors="replace")
@@ -295,16 +288,12 @@ class SSHManager:
             if result.success:
                 logger.debug(f"Command succeeded on {host.name}")
             else:
-                logger.warning(
-                    f"Command failed on {host.name} with exit code {exit_code}"
-                )
+                logger.warning(f"Command failed on {host.name} with exit code {exit_code}")
 
             return result
 
-        except socket.timeout as e:
-            raise SSHConnectionError(
-                host.hostname, f"Command timed out after {timeout}s"
-            ) from e
+        except TimeoutError as e:
+            raise SSHConnectionError(host.hostname, f"Command timed out after {timeout}s") from e
 
         except paramiko.SSHException as e:
             # Connection may be stale, try to reconnect
@@ -330,7 +319,7 @@ class SSHManager:
         try:
             client = self._create_client(host, password=password, timeout=10)
             # Run a simple command to verify
-            stdin, stdout, stderr = client.exec_command("echo ok")
+            _stdin, stdout, _stderr = client.exec_command("echo ok")
             result = stdout.read().decode().strip()
             client.close()
 
@@ -368,7 +357,7 @@ class SSHManager:
     def close_all(self) -> None:
         """Close all pooled connections."""
         with self._lock:
-            for name, pooled in list(self._pool.items()):
+            for _name, pooled in list(self._pool.items()):
                 try:
                     pooled.client.close()
                 except Exception:
@@ -380,9 +369,7 @@ class SSHManager:
     def active_connections(self) -> list[str]:
         """List of currently pooled host names."""
         with self._lock:
-            return [
-                name for name, pooled in self._pool.items() if pooled.is_active()
-            ]
+            return [name for name, pooled in self._pool.items() if pooled.is_active()]
 
     def __enter__(self) -> SSHManager:
         return self
