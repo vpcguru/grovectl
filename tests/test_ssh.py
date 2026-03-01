@@ -286,9 +286,10 @@ class TestSSHManager:
 
     def test_context_manager(self) -> None:
         """Test SSHManager as context manager."""
-        with SSHManager() as manager:
-            assert manager is not None
-        # close_all should have been called
+        with patch.object(SSHManager, "close_all") as mock_close_all:
+            with SSHManager() as manager:
+                assert manager is not None
+            mock_close_all.assert_called_once()
 
 
 class TestHostIsLocal:
