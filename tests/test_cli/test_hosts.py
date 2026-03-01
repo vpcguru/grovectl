@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 from click.testing import CliRunner
@@ -18,7 +18,7 @@ def runner() -> CliRunner:
 
 
 @pytest.fixture
-def isolated_config(runner: CliRunner, temp_config_file: Path):
+def isolated_config(runner: CliRunner, _temp_config_file: Path) -> object:
     """Run CLI commands with isolated config."""
     return runner.isolated_filesystem()
 
@@ -243,7 +243,7 @@ class TestHostsTest:
     @patch("grovectl.core.ssh.SSHManager.test_connection")
     def test_test_host_success(
         self,
-        mock_test: patch,
+        mock_test: MagicMock,
         runner: CliRunner,
         temp_config_file: Path,
     ) -> None:
@@ -261,7 +261,7 @@ class TestHostsTest:
     @patch("grovectl.core.ssh.SSHManager.test_connection")
     def test_test_host_failure(
         self,
-        mock_test: patch,
+        mock_test: MagicMock,
         runner: CliRunner,
         temp_config_file: Path,
     ) -> None:

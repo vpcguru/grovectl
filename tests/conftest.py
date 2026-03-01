@@ -7,12 +7,14 @@ including mocked SSH connections, sample configurations, and test data.
 from __future__ import annotations
 
 import tempfile
+from collections.abc import Generator
 from pathlib import Path
 from typing import TYPE_CHECKING
 from unittest.mock import MagicMock, patch
 
 import pytest
 import yaml
+from click.testing import CliRunner
 
 from grovectl.core.config import ConfigManager
 from grovectl.core.ssh import SSHManager, SSHResult
@@ -167,7 +169,7 @@ def mock_ssh_result_failure() -> SSHResult:
 @pytest.fixture
 def mock_ssh_manager() -> Generator[SSHManager, None, None]:
     """Create a mocked SSH manager."""
-    with patch.object(SSHManager, "__init__", lambda self, **kwargs: None):
+    with patch.object(SSHManager, "__init__", lambda _self, **_kwargs: None):
         manager = SSHManager()
         manager._pool = {}
         manager._lock = MagicMock()
@@ -223,6 +225,4 @@ def tart_list_json_output() -> str:
 @pytest.fixture
 def cli_runner() -> CliRunner:
     """Create a Click test runner."""
-    from click.testing import CliRunner
-
     return CliRunner()

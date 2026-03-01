@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Generator
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
@@ -19,7 +20,7 @@ def runner() -> CliRunner:
 
 
 @pytest.fixture
-def mock_vm_manager():
+def mock_vm_manager() -> Generator[MagicMock, None, None]:
     """Create a mock VM manager."""
     with patch("grovectl.cli.main.Context.init_vm_manager") as mock:
         manager = MagicMock()
@@ -64,7 +65,14 @@ class TestVMList:
 
         result = runner.invoke(
             cli,
-            ["--config", str(temp_config_file), "vm", "list", "--host", "mac-builder-1"],
+            [
+                "--config",
+                str(temp_config_file),
+                "vm",
+                "list",
+                "--host",
+                "mac-builder-1",
+            ],
         )
 
         assert result.exit_code == 0

@@ -428,7 +428,9 @@ def vm_create(
         $ grovectl vm create my-vm --host mac-builder-1 --image base-template --cpu 8 --memory 16384
     """
     if ctx.dry_run:
-        print_info(f"[DRY RUN] Would create VM '{name}' from '{image}' on '{host_name}'")
+        print_info(
+            f"[DRY RUN] Would create VM '{name}' from '{image}' on '{host_name}'"
+        )
         return
 
     try:

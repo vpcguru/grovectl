@@ -60,7 +60,7 @@ def config_show(ctx: Context, fmt: str) -> None:
 
 @config.command("validate")
 @pass_context
-def config_validate(ctx: Context) -> None:
+def config_validate(_ctx: Context) -> None:
     """Validate the configuration file.
 
     Checks that the configuration file exists and contains
@@ -84,7 +84,9 @@ def config_validate(ctx: Context) -> None:
         print_success(f"Configuration is valid: {config_path}")
         console.print(f"  Hosts: {len(config_manager.hosts)}")
         console.print(f"  Default CPU: {config_manager.config.defaults.vm_cpu}")
-        console.print(f"  Default Memory: {config_manager.config.defaults.vm_memory} MB")
+        console.print(
+            f"  Default Memory: {config_manager.config.defaults.vm_memory} MB"
+        )
         console.print(f"  Default Disk: {config_manager.config.defaults.vm_disk} GB")
         console.print(f"  Log Level: {config_manager.config.logging.level}")
 
@@ -101,7 +103,7 @@ def config_validate(ctx: Context) -> None:
     help="Overwrite existing configuration.",
 )
 @pass_context
-def config_init(ctx: Context, force: bool) -> None:
+def config_init(_ctx: Context, force: bool) -> None:
     """Create a default configuration file.
 
     Creates an example configuration file with sample hosts
@@ -158,7 +160,7 @@ def config_path() -> None:
     help="Editor to use (default: $EDITOR or vim).",
 )
 @pass_context
-def config_edit(ctx: Context, editor: str) -> None:
+def config_edit(_ctx: Context, editor: str) -> None:
     """Open configuration file in editor.
 
     Opens the configuration file in the specified editor.
@@ -198,4 +200,4 @@ def config_edit(ctx: Context, editor: str) -> None:
     except FileNotFoundError:
         print_error(f"Editor not found: {editor}")
         print_info("Set the EDITOR environment variable or use --editor")
-        raise SystemExit(1)
+        raise SystemExit(1) from None
