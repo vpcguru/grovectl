@@ -84,9 +84,7 @@ def config_validate(_ctx: Context) -> None:
         print_success(f"Configuration is valid: {config_path}")
         console.print(f"  Hosts: {len(config_manager.hosts)}")
         console.print(f"  Default CPU: {config_manager.config.defaults.vm_cpu}")
-        console.print(
-            f"  Default Memory: {config_manager.config.defaults.vm_memory} MB"
-        )
+        console.print(f"  Default Memory: {config_manager.config.defaults.vm_memory} MB")
         console.print(f"  Default Disk: {config_manager.config.defaults.vm_disk} GB")
         console.print(f"  Log Level: {config_manager.config.logging.level}")
 

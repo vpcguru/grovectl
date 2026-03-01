@@ -222,29 +222,118 @@ grovectl vm list --format yaml
 
 ## Development
 
+### Local Testing Environment
+
+To test grovectl end-to-end locally, you can run a macOS VM on your Mac using [tart](https://github.com/cirruslabs/tart).
+
+#### 1. Install tart
+
+```bash
+brew install cirruslabs/cli/tart
+```
+
+#### 2. Pull and run a macOS VM image
+
+```bash
+# Download the base image (this may take a while — it's a full macOS image)
+tart clone ghcr.io/cirruslabs/macos-tahoe-base:latest tahoe-base
+
+# Start the VM
+tart run tahoe-base
+```
+
+The VM will launch and boot macOS. The default credentials for Cirrus Labs images are:
+
+| Field    | Value   |
+|----------|---------|
+| Username | `admin` |
+| Password | `admin` |
+
+#### 3. Configure grovectl to use the local tart installation
+
+When `hostname` is `localhost` or `127.0.0.1`, grovectl runs tart commands directly via subprocess — **no SSH setup required**.
+
+```bash
+grovectl config init
+```
+
+Edit `~/.grovectl/config.yaml`:
+
+```yaml
+hosts:
+  - name: local-tart
+    hostname: localhost   # triggers local (subprocess) mode — no SSH needed
+```
+
+#### 4. Test the connection and list VMs
+
+```bash
+# Verifies tart is installed and accessible
+grovectl hosts test local-tart
+
+# Lists all VMs managed by your local tart installation
+grovectl vm list --host local-tart
+```
+
+#### 5. Get the guest VM's IP (optional)
+
+If you want to SSH directly *into* the macOS VM itself (not the host), use:
+
+```bash
+# Run in a separate terminal while the VM is running
+tart ip tahoe-base
+# e.g. 192.168.64.5
+
+ssh admin@192.168.64.5   # password: admin
+```
+
+> **Note:** The guest IP is only needed for direct access inside the VM. grovectl itself only needs `localhost` and does not use SSH for local hosts.
+
 ### Setup
 
 ```bash
 # Install uv (if not already installed)
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
+# Install all dependencies
+uv sync --all-extras
+
 # Run tests
-make test
+nox -s tests
 
-# Run tests with coverage
-make test-cov
+# Run tests on a specific Python version
+nox -s tests-3.11
 
-# Format code
-make format
+# Format code (check only)
+nox -s format
+
+# Apply formatting
+nox -s format -- --write
 
 # Lint code
-make lint
+nox -s lint
+
+# Auto-fix lint issues
+nox -s lint -- --fix
 
 # Type check
-make type-check
+nox -s type_check
 
 # Run pre-commit hooks
-make pre-commit
+nox -s pre_commit
+
+# Run all checks (lint + type check + tests)
+nox
+```
+
+If you have [just](https://github.com/casey/just) installed, shorthand commands are also available:
+
+```bash
+just test        # run tests
+just lint        # check linting
+just format      # check formatting
+just types       # type check
+just check       # run all checks
 ```
 
 ### Project Structure

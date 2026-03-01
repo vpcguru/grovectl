@@ -10,6 +10,8 @@ This module provides a thread-safe SSH connection manager that handles:
 from __future__ import annotations
 
 import contextlib
+import shlex
+import subprocess
 import threading
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -181,6 +183,67 @@ class SSHManager:
             client.close()
             raise SSHConnectionError(host.hostname, str(e)) from e
 
+    def _run_local(
+        self,
+        command: str,
+        host_name: str,
+        dry_run: bool = False,
+    ) -> SSHResult:
+        """Execute a command locally via subprocess instead of SSH.
+
+        Used when the host hostname is localhost/127.0.0.1, inheriting the
+        current process's PATH so Homebrew-installed tools like tart are found.
+
+        Args:
+            command: Command string to execute.
+            host_name: Name of the host (for result metadata).
+            dry_run: If True, log the command but don't execute it.
+
+        Returns:
+            SSHResult populated from subprocess output.
+        """
+        if dry_run:
+            logger.info(f"[DRY RUN] Would execute locally: {command}")
+            return SSHResult(
+                stdout="[dry-run mode - command not executed]",
+                stderr="",
+                exit_code=0,
+                host=host_name,
+                command=command,
+            )
+
+        logger.debug(f"Executing locally: {command}")
+        try:
+            result = subprocess.run(
+                shlex.split(command),
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            return SSHResult(
+                stdout=result.stdout.strip(),
+                stderr=result.stderr.strip(),
+                exit_code=result.returncode,
+                host=host_name,
+                command=command,
+            )
+        except FileNotFoundError:
+            return SSHResult(
+                stdout="",
+                stderr="tart not found — is it installed? (brew install cirruslabs/cli/tart)",
+                exit_code=127,
+                host=host_name,
+                command=command,
+            )
+        except Exception as e:
+            return SSHResult(
+                stdout="",
+                stderr=str(e),
+                exit_code=1,
+                host=host_name,
+                command=command,
+            )
+
     def get_client(
         self,
         host: Host,
@@ -253,6 +316,9 @@ class SSHManager:
             >>> if result.success:
             ...     data = json.loads(result.stdout)
         """
+        if host.is_local:
+            return self._run_local(command, host.name, dry_run=dry_run)
+
         if dry_run:
             logger.info(f"[DRY RUN] Would execute on {host.name}: {command}")
             return SSHResult(
@@ -292,9 +358,7 @@ class SSHManager:
             return result
 
         except TimeoutError as e:
-            raise SSHConnectionError(
-                host.hostname, f"Command timed out after {timeout}s"
-            ) from e
+            raise SSHConnectionError(host.hostname, f"Command timed out after {timeout}s") from e
 
         except paramiko.SSHException as e:
             # Connection may be stale, try to reconnect
@@ -317,28 +381,32 @@ class SSHManager:
         Returns:
             Tuple of (success, message).
         """
+        if host.is_local:
+            result = self._run_local("tart --version", host.name)
+            if result.success:
+                version = result.stdout.splitlines()[0] if result.stdout else "unknown version"
+                return True, f"Local tart available on {host.name} ({version})"
+            return False, f"tart not found locally: {result.stderr}"
+
+        failure_msg: str = ""
         try:
             client = self._create_client(host, password=password, timeout=10)
             # Run a simple command to verify
             _stdin, stdout, _stderr = client.exec_command("echo ok")
-            result = stdout.read().decode().strip()
+            output = stdout.read().decode().strip()
             client.close()
-
-            if result == "ok":
+            if output == "ok":
                 return True, f"Connected to {host.name} ({host.hostname})"
-            return False, f"Unexpected response from {host.name}"
-
+            failure_msg = f"Unexpected response from {host.name}"
         except SSHAuthenticationError as e:
-            return False, f"Authentication failed: {e.message}"
-
+            failure_msg = f"Authentication failed: {e.message}"
         except SSHTimeoutError as e:
-            return False, f"Connection timed out: {e.message}"
-
+            failure_msg = f"Connection timed out: {e.message}"
         except SSHConnectionError as e:
-            return False, f"Connection failed: {e.message}"
-
+            failure_msg = f"Connection failed: {e.message}"
         except Exception as e:
-            return False, f"Unexpected error: {e}"
+            failure_msg = f"Unexpected error: {e}"
+        return False, failure_msg
 
     def close(self, host_name: str) -> None:
         """Close a specific pooled connection.
