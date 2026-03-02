@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from subprocess import CompletedProcess
+from subprocess import CompletedProcess, TimeoutExpired
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -353,6 +353,7 @@ class TestSSHManagerLocalExecution:
             capture_output=True,
             text=True,
             check=False,
+            timeout=30,  # default_timeout
         )
 
     @patch("subprocess.run")
@@ -380,6 +381,17 @@ class TestSSHManagerLocalExecution:
         mock_subprocess.assert_not_called()
         assert result.success is True
         assert "dry-run" in result.stdout.lower()
+
+    @patch("subprocess.run", side_effect=TimeoutExpired(cmd="tart list", timeout=30))
+    def test_run_local_timeout(
+        self, _mock: MagicMock, ssh_manager: SSHManager, local_host: Host
+    ) -> None:
+        """TimeoutExpired returns exit_code 124 with a timeout message."""
+        result = ssh_manager._run_local("tart list", local_host.name, timeout=30)
+
+        assert result.success is False
+        assert result.exit_code == 124
+        assert "timed out after 30s" in result.stderr
 
     @patch("subprocess.run", side_effect=FileNotFoundError)
     def test_run_local_command_not_found(

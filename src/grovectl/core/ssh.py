@@ -188,6 +188,7 @@ class SSHManager:
         command: str,
         host_name: str,
         dry_run: bool = False,
+        timeout: int | None = None,
     ) -> SSHResult:
         """Execute a command locally via subprocess instead of SSH.
 
@@ -198,6 +199,7 @@ class SSHManager:
             command: Command string to execute.
             host_name: Name of the host (for result metadata).
             dry_run: If True, log the command but don't execute it.
+            timeout: Execution timeout in seconds. Uses default_timeout if not specified.
 
         Returns:
             SSHResult populated from subprocess output.
@@ -212,6 +214,7 @@ class SSHManager:
                 command=command,
             )
 
+        exec_timeout = timeout or self.default_timeout
         logger.debug(f"Executing locally: {command}")
         try:
             result = subprocess.run(
@@ -219,11 +222,20 @@ class SSHManager:
                 capture_output=True,
                 text=True,
                 check=False,
+                timeout=exec_timeout,
             )
             return SSHResult(
                 stdout=result.stdout.strip(),
                 stderr=result.stderr.strip(),
                 exit_code=result.returncode,
+                host=host_name,
+                command=command,
+            )
+        except subprocess.TimeoutExpired:
+            return SSHResult(
+                stdout="",
+                stderr=f"Command timed out after {exec_timeout}s",
+                exit_code=124,
                 host=host_name,
                 command=command,
             )
@@ -317,7 +329,7 @@ class SSHManager:
             ...     data = json.loads(result.stdout)
         """
         if host.is_local:
-            return self._run_local(command, host.name, dry_run=dry_run)
+            return self._run_local(command, host.name, dry_run=dry_run, timeout=timeout)
 
         if dry_run:
             logger.info(f"[DRY RUN] Would execute on {host.name}: {command}")
@@ -382,7 +394,7 @@ class SSHManager:
             Tuple of (success, message).
         """
         if host.is_local:
-            result = self._run_local("tart --version", host.name)
+            result = self._run_local("tart --version", host.name, timeout=10)
             if result.success:
                 version = result.stdout.splitlines()[0] if result.stdout else "unknown version"
                 return True, f"Local tart available on {host.name} ({version})"
