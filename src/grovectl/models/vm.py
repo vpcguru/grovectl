@@ -7,13 +7,13 @@ managed via the tart CLI on remote hosts.
 from __future__ import annotations
 
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Annotated
 
 from pydantic import BaseModel, Field
 
 
-class VMState(str, Enum):
+class VMState(StrEnum):
     """Possible states for a virtual machine."""
 
     RUNNING = "running"
