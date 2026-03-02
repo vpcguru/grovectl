@@ -60,7 +60,7 @@ def config_show(ctx: Context, fmt: str) -> None:
 
 @config.command("validate")
 @pass_context
-def config_validate(ctx: Context) -> None:
+def config_validate(_ctx: Context) -> None:
     """Validate the configuration file.
 
     Checks that the configuration file exists and contains
@@ -101,7 +101,7 @@ def config_validate(ctx: Context) -> None:
     help="Overwrite existing configuration.",
 )
 @pass_context
-def config_init(ctx: Context, force: bool) -> None:
+def config_init(_ctx: Context, force: bool) -> None:
     """Create a default configuration file.
 
     Creates an example configuration file with sample hosts
@@ -158,7 +158,7 @@ def config_path() -> None:
     help="Editor to use (default: $EDITOR or vim).",
 )
 @pass_context
-def config_edit(ctx: Context, editor: str) -> None:
+def config_edit(_ctx: Context, editor: str) -> None:
     """Open configuration file in editor.
 
     Opens the configuration file in the specified editor.
@@ -198,4 +198,4 @@ def config_edit(ctx: Context, editor: str) -> None:
     except FileNotFoundError:
         print_error(f"Editor not found: {editor}")
         print_info("Set the EDITOR environment variable or use --editor")
-        raise SystemExit(1)
+        raise SystemExit(1) from None

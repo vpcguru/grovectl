@@ -7,7 +7,7 @@ including tables, progress bars, spinners, and color-coded status.
 from __future__ import annotations
 
 import json
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 import yaml
@@ -32,7 +32,7 @@ console = Console()
 error_console = Console(stderr=True)
 
 
-class OutputFormat(str, Enum):
+class OutputFormat(StrEnum):
     """Supported output formats."""
 
     TABLE = "table"

@@ -158,10 +158,7 @@ class VMManager:
         Raises:
             HostNotFoundError: If specified host is not found.
         """
-        if host_name:
-            hosts = [self._get_host(host_name)]
-        else:
-            hosts = self.config.hosts
+        hosts = [self._get_host(host_name)] if host_name else self.config.hosts
 
         if not hosts:
             logger.warning("No hosts configured")

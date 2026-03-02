@@ -287,7 +287,7 @@ class TestVMManager:
         """Test batch starting VMs."""
         # Mock list_vms - note: start_vm calls get_vm() internally to get updated status
         mock_ssh_manager.run.side_effect = [
-            # First call for list (batch_start initial list)
+            # Initial list for batch_start
             SSHResult(
                 stdout='[{"Name": "test-1", "State": "stopped"}, {"Name": "test-2", "State": "stopped"}]',
                 stderr="",
@@ -301,11 +301,11 @@ class TestVMManager:
                 stderr="",
                 exit_code=0,
                 host="mac-builder-1",
-                command="tart run test-1",
+                command="tart run test-1 --no-graphics",
             ),
-            # get_vm for test-1 (called by start_vm to return updated status)
+            # get_vm list after starting test-1
             SSHResult(
-                stdout='[{"Name": "test-1", "State": "running"}]',
+                stdout='[{"Name": "test-1", "State": "running"}, {"Name": "test-2", "State": "stopped"}]',
                 stderr="",
                 exit_code=0,
                 host="mac-builder-1",
@@ -317,11 +317,11 @@ class TestVMManager:
                 stderr="",
                 exit_code=0,
                 host="mac-builder-1",
-                command="tart run test-2",
+                command="tart run test-2 --no-graphics",
             ),
-            # get_vm for test-2 (called by start_vm to return updated status)
+            # get_vm list after starting test-2
             SSHResult(
-                stdout='[{"Name": "test-2", "State": "running"}]',
+                stdout='[{"Name": "test-1", "State": "running"}, {"Name": "test-2", "State": "running"}]',
                 stderr="",
                 exit_code=0,
                 host="mac-builder-1",

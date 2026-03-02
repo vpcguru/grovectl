@@ -6,11 +6,14 @@ extracted to avoid circular imports.
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import click
 
-from grovectl.core.config import ConfigManager
-from grovectl.core.ssh import SSHManager
-from grovectl.core.vm_manager import VMManager
+if TYPE_CHECKING:
+    from grovectl.core.config import ConfigManager
+    from grovectl.core.ssh import SSHManager
+    from grovectl.core.vm_manager import VMManager
 
 
 class Context:
@@ -42,6 +45,8 @@ class Context:
         Returns:
             ConfigManager instance.
         """
+        from grovectl.core.config import ConfigManager
+
         if self.config is None:
             self.config = ConfigManager()
         return self.config
@@ -52,6 +57,8 @@ class Context:
         Returns:
             SSHManager instance.
         """
+        from grovectl.core.ssh import SSHManager
+
         if self.ssh is None:
             self.ssh = SSHManager()
         return self.ssh
@@ -62,9 +69,12 @@ class Context:
         Returns:
             VMManager instance.
         """
+        config = self.init_config()
+        ssh = self.init_ssh()
+
+        from grovectl.core.vm_manager import VMManager
+
         if self.vm_manager is None:
-            config = self.init_config()
-            ssh = self.init_ssh()
             self.vm_manager = VMManager(config, ssh, dry_run=self.dry_run)
         return self.vm_manager
 

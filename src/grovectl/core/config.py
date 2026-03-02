@@ -232,10 +232,6 @@ class ConfigManager:
         """
         try:
             data = self.config.model_dump(exclude_none=True)
-            # Convert Host objects to dicts
-            if "hosts" in data:
-                data["hosts"] = [h if isinstance(h, dict) else h for h in data["hosts"]]
-
             with self.path.open("w") as f:
                 yaml.safe_dump(data, f, default_flow_style=False, sort_keys=False)
         except Exception as e:
@@ -315,10 +311,7 @@ class ConfigManager:
         Returns:
             Path to the created config file.
         """
-        if path is None:
-            path = get_default_config_path()
-        else:
-            path = Path(path).expanduser()
+        path = get_default_config_path() if path is None else Path(path).expanduser()
 
         path.parent.mkdir(parents=True, exist_ok=True)
 

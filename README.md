@@ -222,73 +222,118 @@ grovectl vm list --format yaml
 
 ## Development
 
-### Setup Development Environment
+### Local Testing Environment
+
+To test grovectl end-to-end locally, you can run a macOS VM on your Mac using [tart](https://github.com/cirruslabs/tart).
+
+#### 1. Install tart
+
+```bash
+brew install cirruslabs/cli/tart
+```
+
+#### 2. Pull and run a macOS VM image
+
+```bash
+# Download the base image (this may take a while — it's a full macOS image)
+tart clone ghcr.io/cirruslabs/macos-tahoe-base:latest tahoe-base
+
+# Start the VM
+tart run tahoe-base
+```
+
+The VM will launch and boot macOS. The default credentials for Cirrus Labs images are:
+
+| Field    | Value   |
+|----------|---------|
+| Username | `admin` |
+| Password | `admin` |
+
+#### 3. Configure grovectl to use the local tart installation
+
+When `hostname` is `localhost` or `127.0.0.1`, grovectl runs tart commands directly via subprocess — **no SSH setup required**.
+
+```bash
+grovectl config init
+```
+
+Edit `~/.grovectl/config.yaml`:
+
+```yaml
+hosts:
+  - name: local-tart
+    hostname: localhost   # triggers local (subprocess) mode — no SSH needed
+```
+
+#### 4. Test the connection and list VMs
+
+```bash
+# Verifies tart is installed and accessible
+grovectl hosts test local-tart
+
+# Lists all VMs managed by your local tart installation
+grovectl vm list --host local-tart
+```
+
+#### 5. Get the guest VM's IP (optional)
+
+If you want to SSH directly *into* the macOS VM itself (not the host), use:
+
+```bash
+# Run in a separate terminal while the VM is running
+tart ip tahoe-base
+# e.g. 192.168.64.5
+
+ssh admin@192.168.64.5   # password: admin
+```
+
+> **Note:** The guest IP is only needed for direct access inside the VM. grovectl itself only needs `localhost` and does not use SSH for local hosts.
+
+### Setup
 
 ```bash
 # Install uv (if not already installed)
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# Install nox globally
-uv tool install nox
+# Install all dependencies
+uv sync --all-extras
 
-# Set up development environment
-nox -s dev
-```
-
-### Common Development Tasks
-
-```bash
-# Run all checks (lint, type check, tests) - this is the default
-nox
-
-# Run tests only
+# Run tests
 nox -s tests
 
-# Run tests for specific Python version
+# Run tests on a specific Python version
 nox -s tests-3.11
 
-# Run tests with specific test file
-nox -s tests -- tests/test_config.py
-
-# Run linting
-nox -s lint
-
-# Auto-fix linting issues
-nox -s lint -- --fix
-
-# Check code formatting
+# Format code (check only)
 nox -s format
 
-# Apply code formatting
+# Apply formatting
 nox -s format -- --write
 
-# Type checking
+# Lint code
+nox -s lint
+
+# Auto-fix lint issues
+nox -s lint -- --fix
+
+# Type check
 nox -s type_check
-
-# Build distribution packages
-nox -s build
-
-# Install in editable mode
-nox -s install
-
-# Clean build artifacts
-nox -s clean
 
 # Run pre-commit hooks
 nox -s pre_commit
 
-# List all available sessions
-nox --list
+# Run all checks (lint + type check + tests)
+nox
 ```
 
-### Running Tests with Coverage
+If you have [just](https://github.com/casey/just) installed, shorthand commands are also available:
 
 ```bash
-# Run tests with HTML coverage report
-nox -s tests
-
-# View coverage report
-open htmlcov/index.html  # macOS
+just test        # run tests
+just lint        # check linting
+just format      # check formatting
+just types       # type check
+just check       # run all checks
 ```
 
 ### Project Structure

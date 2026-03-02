@@ -46,6 +46,11 @@ class Host(BaseModel):
         return v
 
     @property
+    def is_local(self) -> bool:
+        """True if this host refers to the local machine."""
+        return self.hostname in ("localhost", "127.0.0.1", "::1")
+
+    @property
     def display_name(self) -> str:
         """Human-readable display name for this host."""
         return f"{self.name} ({self.hostname})"
