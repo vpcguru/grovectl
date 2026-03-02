@@ -436,7 +436,11 @@ class TestSSHManagerLocalExecution:
             mock_stdout.channel.recv_exit_status.return_value = 0
             mock_stderr = MagicMock()
             mock_stderr.read.return_value = b""
-            mock_client.exec_command.return_value = (MagicMock(), mock_stdout, mock_stderr)
+            mock_client.exec_command.return_value = (
+                MagicMock(),
+                mock_stdout,
+                mock_stderr,
+            )
 
             ssh_manager.run(remote_host, "tart list")
 
